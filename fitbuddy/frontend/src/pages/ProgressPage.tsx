@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   TrendingUp, 
   Scale, 
@@ -20,14 +20,12 @@ import {
   Tooltip, 
   CartesianGrid 
 } from 'recharts';
-import { useAuth } from '../context/AuthContext';
-import { progressAPI } from '../services/api';
+import { useApp } from '../context/AppContext';
 import type { ProgressLog } from '../types';
 
 export const ProgressPage: React.FC = () => {
-  const { profile, updateProfile } = useAuth();
-  
-  const [logs, setLogs] = useState<ProgressLog[]>([]);
+  const { profile, updateProfile, progressLogs, addProgressLog } = useApp();
+  const logs: ProgressLog[] = progressLogs;
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [showLogModal, setShowLogModal] = useState<boolean>(false);
 
@@ -37,56 +35,22 @@ export const ProgressPage: React.FC = () => {
   const [workoutTitle, setWorkoutTitle] = useState<string>('Upper Body Strength');
   const [notes, setNotes] = useState<string>('');
 
-  const fetchLogs = async () => {
-    try {
-      const res = await progressAPI.getProgress();
-      if (res.data && res.data.logs) {
-        setLogs(res.data.logs);
-      }
-    } catch (err) {
-      console.warn('Using demo progress data');
-      const sampleLogs: ProgressLog[] = [
-        { date: 'Sep 10', weight: 76.5, workoutCompleted: true },
-        { date: 'Sep 12', weight: 76.0, workoutCompleted: true },
-        { date: 'Sep 14', weight: 75.8, workoutCompleted: true },
-        { date: 'Sep 16', weight: 75.2, workoutCompleted: true },
-        { date: 'Sep 18', weight: 74.8, workoutCompleted: true },
-        { date: 'Sep 20', weight: 74.5, workoutCompleted: true },
-        { date: 'Sep 22', weight: 74.2, workoutCompleted: true },
-        { date: 'Sep 24', weight: 74.0, workoutCompleted: true },
-      ];
-      setLogs(sampleLogs);
-    }
-  };
-
-  useEffect(() => {
-    fetchLogs();
-  }, []);
-
   const handleAddLog = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!weight) return;
 
     setSubmitting(true);
-    try {
-      const res = await progressAPI.logProgress({
-        weight: Number(weight),
-        workoutCompleted,
-        workoutTitle,
-        notes,
-      });
-
-      if (res.data && res.data.progress) {
-        await updateProfile({ weight: Number(weight) });
-        await fetchLogs();
-        setShowLogModal(false);
-        setNotes('');
-      }
-    } catch (err) {
-      console.error('Error adding log:', err);
-    } finally {
-      setSubmitting(false);
-    }
+    addProgressLog({
+      date: new Date().toISOString(),
+      weight: Number(weight),
+      workoutCompleted,
+      workoutTitle,
+      notes,
+    });
+    await updateProfile({ weight: Number(weight) });
+    setShowLogModal(false);
+    setNotes('');
+    setSubmitting(false);
   };
 
   const chartData = logs.map(item => {

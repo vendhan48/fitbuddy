@@ -6,63 +6,41 @@ import {
   Check, 
   ArrowRight
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useApp } from '../context/AppContext';
 import AIPulse from '../components/AIPulse';
 
 export const WorkoutPage: React.FC = () => {
-  const { plan, setActiveTab } = useAuth();
+  const { plan, setPlan, setActiveTab } = useApp();
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
 
-  const workoutDays = plan?.workoutPlan || [
-    {
-      day: 'Day 1: Upper Body Strength',
-      focus: 'Chest, Shoulders & Triceps',
-      exercises: [
-        { id: 'ex1', name: 'Barbell Bench Press', sets: 4, reps: '8-10 reps', rest: '90 sec', instructions: 'Keep shoulder blades retracted and drive through feet.' },
-        { id: 'ex2', name: 'Incline Dumbbell Press', sets: 3, reps: '10-12 reps', rest: '60 sec', instructions: 'Control the descent and pause briefly at bottom.' },
-        { id: 'ex3', name: 'Seated Overhead Dumbbell Press', sets: 3, reps: '10-12 reps', rest: '60 sec', instructions: 'Avoid excessive arching in lower back.' },
-        { id: 'ex4', name: 'Tricep Rope Pushdowns', sets: 3, reps: '12-15 reps', rest: '45 sec', instructions: 'Keep elbows pinned to your sides.' },
-      ]
-    },
-    {
-      day: 'Day 2: Lower Body Power',
-      focus: 'Quads, Hamstrings & Calves',
-      exercises: [
-        { id: 'ex5', name: 'Barbell Back Squat', sets: 4, reps: '6-8 reps', rest: '120 sec', instructions: 'Break at knees and hips simultaneously.' },
-        { id: 'ex6', name: 'Romanian Deadlift', sets: 3, reps: '8-10 reps', rest: '90 sec', instructions: 'Focus on hip hinge and hamstring stretch.' },
-        { id: 'ex7', name: 'Walking Lunges', sets: 3, reps: '12 reps / leg', rest: '60 sec', instructions: 'Keep torso upright throughout range of motion.' },
-      ]
-    },
-    {
-      day: 'Day 3: Active Recovery & Core',
-      focus: 'Core, Mobility & Light Cardio',
-      exercises: [
-        { id: 'ex8', name: 'Plank Hold', sets: 3, reps: '60 sec hold', rest: '45 sec', instructions: 'Maintain straight line from shoulders to heels.' },
-        { id: 'ex9', name: 'Hanging Leg Raises', sets: 3, reps: '12-15 reps', rest: '45 sec', instructions: 'Control movement without swinging.' },
-      ]
-    }
-  ];
+  const workoutDays = plan?.workoutPlan || [];
 
   const currentDay = workoutDays[selectedDayIndex] || workoutDays[0];
   
-  const [completedExercises, setCompletedExercises] = useState<{ [key: string]: boolean }>({
-    ex1: true,
-    ex2: true
-  });
-
   const toggleExercise = (exerciseId: string) => {
-    setCompletedExercises(prev => ({
-      ...prev,
-      [exerciseId]: !prev[exerciseId]
-    }));
+    setPlan((current) => current ? {
+      ...current,
+      workoutPlan: current.workoutPlan.map((day, dayIndex) => dayIndex === selectedDayIndex
+        ? { ...day, exercises: day.exercises.map((exercise) => exercise.id === exerciseId
+          ? { ...exercise, completed: !exercise.completed }
+          : exercise) }
+        : day),
+    } : current);
   };
 
-  const totalExercises = currentDay.exercises?.length || 0;
-  const completedCount = currentDay.exercises?.filter(ex => completedExercises[ex.id]).length || 0;
+  const totalExercises = currentDay?.exercises?.length || 0;
+  const completedCount = currentDay?.exercises?.filter((exercise) => exercise.completed).length || 0;
   const completionPercentage = totalExercises > 0 ? Math.round((completedCount / totalExercises) * 100) : 0;
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
+      {!currentDay && (
+        <div className="bg-white rounded-3xl p-10 text-center border border-slate-200/80">
+          <h1 className="text-2xl font-extrabold text-slate-900">Your workout plan is ready to create</h1>
+          <button onClick={() => setActiveTab('profile')} className="mt-5 px-5 py-3 rounded-xl bg-blue-600 text-white font-bold">Set Up Fitness Profile</button>
+        </div>
+      )}
+      {currentDay && <>
       
       {/* Header Banner */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-soft-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -150,7 +128,7 @@ export const WorkoutPage: React.FC = () => {
 
         <div className="space-y-4">
           {currentDay.exercises?.map((exercise, idx) => {
-            const isCompleted = !!completedExercises[exercise.id];
+            const isCompleted = !!exercise.completed;
 
             return (
               <div 
@@ -209,6 +187,7 @@ export const WorkoutPage: React.FC = () => {
         </div>
       </div>
 
+      </>}
     </div>
   );
 };

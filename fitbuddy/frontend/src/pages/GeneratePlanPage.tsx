@@ -8,12 +8,12 @@ import {
   SlidersHorizontal,
   Calendar
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useApp } from '../context/AppContext';
 import MedicalDisclaimer from '../components/MedicalDisclaimer';
 import AIPulse from '../components/AIPulse';
 
 export const GeneratePlanPage: React.FC = () => {
-  const { plan, profile, generateNewPlan, setActiveTab } = useAuth();
+  const { plan, profile, generateNewPlan, setActiveTab } = useApp();
   const [generating, setGenerating] = useState(false);
 
   const handleGenerate = async () => {

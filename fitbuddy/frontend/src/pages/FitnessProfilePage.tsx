@@ -7,29 +7,30 @@ import {
   Sparkles,
   SlidersHorizontal
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useApp } from '../context/AppContext';
 import AIPulse from '../components/AIPulse';
 
 export const FitnessProfilePage: React.FC = () => {
-  const { user, profile, updateProfile, setActiveTab } = useAuth();
+  const { profile, updateProfile, generateNewPlan, setActiveTab } = useApp();
 
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(!profile);
   const [successMsg, setSuccessMsg] = useState('');
+  const [generating, setGenerating] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
-    age: profile?.age || 25,
-    gender: profile?.gender || 'male',
-    weight: profile?.weight || 75,
-    height: profile?.height || 178,
-    goal: profile?.goal || 'Build Muscle',
-    activityLevel: profile?.activityLevel || 'moderately_active',
-    experience: profile?.experience || 'intermediate',
-    workoutDays: profile?.workoutDays || 4,
-    workoutDuration: profile?.workoutDuration || 45,
-    equipment: typeof profile?.equipment === 'string' ? profile.equipment : 'dumbbells, barbell',
-    preferredLocation: profile?.preferredLocation || 'gym',
-    dietaryPreference: profile?.dietaryPreference || 'high_protein',
+    age: profile?.age ?? 25,
+    gender: profile?.gender || 'Female',
+    weight: profile?.weight ?? 70,
+    height: profile?.height ?? 170,
+    goal: profile?.goal || 'General Fitness',
+    activityLevel: profile?.activityLevel || 'Moderately Active',
+    experience: profile?.experience || 'Beginner',
+    workoutDays: profile?.workoutDays ?? 4,
+    workoutDuration: profile?.workoutDuration ?? 45,
+    equipment: typeof profile?.equipment === 'string' ? profile.equipment : 'Dumbbells, Bodyweight',
+    preferredLocation: profile?.preferredLocation || 'Gym',
+    dietaryPreference: profile?.dietaryPreference || 'Balanced',
   });
 
   const handleSave = async (e: React.FormEvent) => {
@@ -40,6 +41,14 @@ export const FitnessProfilePage: React.FC = () => {
     setTimeout(() => setSuccessMsg(''), 3000);
   };
 
+  const handleGenerate = async () => {
+    setGenerating(true);
+    await updateProfile(formData);
+    const generated = await generateNewPlan(formData);
+    setGenerating(false);
+    if (generated) setActiveTab('dashboard');
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
 
@@ -47,14 +56,14 @@ export const FitnessProfilePage: React.FC = () => {
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-soft-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-blue-600 to-emerald-500 text-white font-extrabold text-2xl flex items-center justify-center shadow-md shadow-blue-500/20">
-            {user?.name?.[0]?.toUpperCase() || 'V'}
+            <Target className="w-7 h-7" />
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              {user?.name || 'Vendhan'}
+              Fitness Profile
             </h1>
             <p className="text-slate-500 text-xs font-semibold mt-0.5">
-              {user?.email || 'vendhan@fitbuddy.com'} • Member since 2026
+              Your fitness information stays on this device.
             </p>
           </div>
         </div>
@@ -68,11 +77,12 @@ export const FitnessProfilePage: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab('plan-generator')}
+            onClick={handleGenerate}
+            disabled={generating}
             className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-bold text-xs shadow-md shadow-blue-500/20 hover:scale-105 transition-all flex items-center gap-1.5"
           >
             <Sparkles className="w-4 h-4" />
-            <span>Generate AI Plan</span>
+            <span>{generating ? 'Generating Your Plan...' : 'Generate My AI Plan →'}</span>
           </button>
         </div>
       </div>
@@ -166,6 +176,18 @@ export const FitnessProfilePage: React.FC = () => {
               </div>
 
               <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Gender</label>
+                <select disabled={!editing} value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-600 disabled:opacity-75">
+                  <option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Height (cm)</label>
+                <input type="number" min="1" required disabled={!editing} value={formData.height} onChange={(e) => setFormData({ ...formData, height: Number(e.target.value) })} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-600 disabled:opacity-75" />
+              </div>
+
+              <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Weight (kg)</label>
                 <input
                   type="number"
@@ -203,6 +225,44 @@ export const FitnessProfilePage: React.FC = () => {
                   <option value={4}>4 Days per week</option>
                   <option value={5}>5 Days per week</option>
                   <option value={6}>6 Days per week</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Activity Level</label>
+                <select disabled={!editing} value={formData.activityLevel} onChange={(e) => setFormData({ ...formData, activityLevel: e.target.value })} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-600 disabled:opacity-75">
+                  <option>Sedentary</option><option>Lightly Active</option><option>Moderately Active</option><option>Very Active</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Workout Experience</label>
+                <select disabled={!editing} value={formData.experience} onChange={(e) => setFormData({ ...formData, experience: e.target.value })} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-600 disabled:opacity-75">
+                  <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Workout Duration (minutes)</label>
+                <input type="number" min="10" required disabled={!editing} value={formData.workoutDuration} onChange={(e) => setFormData({ ...formData, workoutDuration: Number(e.target.value) })} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-600 disabled:opacity-75" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Workout Location</label>
+                <select disabled={!editing} value={formData.preferredLocation} onChange={(e) => setFormData({ ...formData, preferredLocation: e.target.value })} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-600 disabled:opacity-75">
+                  <option>Gym</option><option>Home</option><option>Gym / Home</option><option>Outdoors</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Available Equipment</label>
+                <input required disabled={!editing} value={formData.equipment} onChange={(e) => setFormData({ ...formData, equipment: e.target.value })} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-600 disabled:opacity-75" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Dietary Preference</label>
+                <select disabled={!editing} value={formData.dietaryPreference} onChange={(e) => setFormData({ ...formData, dietaryPreference: e.target.value })} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-600 disabled:opacity-75">
+                  <option>Balanced</option><option>High Protein</option><option>Vegetarian</option><option>Vegan</option><option>Pescatarian</option>
                 </select>
               </div>
             </div>

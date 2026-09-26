@@ -6,24 +6,22 @@ import {
   TrendingUp, 
   Bot, 
   User as UserIcon, 
-  LogOut, 
   Activity, 
   Sparkles,
-  Settings,
-  ChevronRight
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useApp } from '../context/AppContext';
 
 export const Sidebar: React.FC = () => {
-  const { activeTab, setActiveTab, user, logout } = useAuth();
+  const { activeTab, setActiveTab } = useApp();
 
   const menuItems = [
-    { id: 'dashboard' as const, label: 'Overview', icon: LayoutDashboard },
+    { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
     { id: 'workout' as const, label: 'My Workout', icon: Dumbbell },
     { id: 'nutrition' as const, label: 'Nutrition', icon: Utensils },
     { id: 'progress' as const, label: 'Progress', icon: TrendingUp },
     { id: 'ai-assistant' as const, label: 'AI Coach', icon: Bot, isAI: true },
-    { id: 'profile' as const, label: 'Profile', icon: UserIcon },
+    { id: 'plan-generator' as const, label: 'My Plan', icon: Activity },
+    { id: 'profile' as const, label: 'Fitness Profile', icon: UserIcon },
   ];
 
   return (
@@ -92,49 +90,10 @@ export const Sidebar: React.FC = () => {
           </nav>
         </div>
 
-        {/* Bottom Profile & Actions */}
-        <div className="p-4 border-t border-slate-100 bg-slate-50/50 space-y-3">
-          
-          {/* User Info Bar */}
-          <div 
-            onClick={() => setActiveTab('profile')}
-            className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200/60 shadow-xs cursor-pointer hover:border-blue-400 transition-all group"
-          >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-emerald-500 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
-                {user?.name?.[0]?.toUpperCase() || 'V'}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">
-                  {user?.name || 'Vendhan'}
-                </p>
-                <p className="text-[10px] text-slate-400 truncate">
-                  {user?.email || 'vendhan@fitbuddy.com'}
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
-          </div>
-
-          {/* Action buttons */}
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => setActiveTab('profile')}
-              className="px-3 py-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <Settings className="w-3.5 h-3.5 text-slate-500" />
-              <span>Settings</span>
-            </button>
-
-            <button
-              onClick={logout}
-              className="px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Logout</span>
-            </button>
-          </div>
-
+        <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+          <button onClick={() => setActiveTab('profile')} className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200/60 text-slate-700 text-xs font-semibold flex items-center gap-2 hover:border-blue-300">
+            <UserIcon className="w-4 h-4 text-blue-600" /> Fitness Profile
+          </button>
         </div>
 
       </aside>

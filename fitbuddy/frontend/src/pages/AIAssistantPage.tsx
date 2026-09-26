@@ -7,7 +7,7 @@ import {
   Loader2, 
   Lightbulb
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useApp } from '../context/AppContext';
 import { aiAPI } from '../services/api';
 import MedicalDisclaimer from '../components/MedicalDisclaimer';
 import AIPulse from '../components/AIPulse';
@@ -20,13 +20,13 @@ interface ChatMessage {
 }
 
 export const AIAssistantPage: React.FC = () => {
-  const { user } = useAuth();
+  const { profile } = useApp();
   
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'm1',
       sender: 'ai',
-      text: `Hello ${user?.name || 'there'}! I'm FitBuddy AI, your personal 24/7 fitness & wellness coach. How can I help you optimize your workout or nutrition today?`,
+      text: `Hello! I'm FitBuddy AI, your personal 24/7 fitness & wellness coach. How can I help you optimize your workout or nutrition today?`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     }
   ]);
@@ -59,7 +59,7 @@ export const AIAssistantPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const res = await aiAPI.sendChatMessage(query);
+      const res = await aiAPI.sendChatMessage(query, profile || undefined);
 
       const aiMsg: ChatMessage = {
         id: `ai-${Date.now()}`,

@@ -1,12 +1,10 @@
 import React from 'react';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AppProvider, useApp } from './context/AppContext';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
 
 import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
 import FitnessProfilePage from './pages/FitnessProfilePage';
 import GeneratePlanPage from './pages/GeneratePlanPage';
 import DashboardPage from './pages/DashboardPage';
@@ -16,21 +14,18 @@ import ProgressPage from './pages/ProgressPage';
 import AIAssistantPage from './pages/AIAssistantPage';
 
 const AppContent: React.FC = () => {
-  const { activeTab, user } = useAuth();
-
-  const isPublicPage = activeTab === 'landing' || activeTab === 'login' || activeTab === 'register';
+  const { activeTab } = useApp();
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       
       {/* Public Pages Layout */}
-      {isPublicPage ? (
+      {activeTab === 'landing' ? (
         <div className="flex flex-col min-h-screen">
           <Navbar />
           <main className="flex-1">
             {activeTab === 'landing' && <LandingPage />}
-            {activeTab === 'login' && <LoginPage />}
-            {activeTab === 'register' && <RegisterPage />}
+            <LandingPage />
           </main>
           <Footer />
         </div>
@@ -44,14 +39,8 @@ const AppContent: React.FC = () => {
             <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-6 py-3.5 flex items-center justify-between sticky top-0 z-40">
               <div className="flex items-center gap-3">
                 <span className="font-extrabold text-base text-slate-900 capitalize tracking-tight">
-                  {activeTab.replace('-', ' ')}
+                  {activeTab === 'dashboard' ? 'Your Fitness Dashboard' : activeTab === 'plan-generator' ? 'My Plan' : activeTab.replace('-', ' ')}
                 </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-400 font-semibold hidden sm:inline">Logged in as</span>
-                <div className="px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-800 text-xs font-bold">
-                  {user?.name || 'Vendhan'}
-                </div>
               </div>
             </header>
 
@@ -76,9 +65,9 @@ const AppContent: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <AuthProvider>
+    <AppProvider>
       <AppContent />
-    </AuthProvider>
+    </AppProvider>
   );
 };
 

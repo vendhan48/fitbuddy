@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Dumbbell, 
   TrendingUp, 
@@ -8,16 +8,14 @@ import {
   ArrowRight,
   Flame,
   Award,
-  Bell,
   Sparkles
 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
-import { useAuth } from '../context/AuthContext';
-import { progressAPI } from '../services/api';
+import { useApp } from '../context/AppContext';
 import AIPulse from '../components/AIPulse';
 
 export const DashboardPage: React.FC = () => {
-  const { user, profile, plan, setActiveTab } = useAuth();
+  const { profile, plan, setActiveTab } = useApp();
   const [weeklyData] = useState<any[]>([
     { day: 'Mon', duration: 45 },
     { day: 'Tue', duration: 50 },
@@ -27,17 +25,6 @@ export const DashboardPage: React.FC = () => {
     { day: 'Sat', duration: 30 },
     { day: 'Sun', duration: 0 },
   ]);
-
-  useEffect(() => {
-    const loadProgress = async () => {
-      try {
-        await progressAPI.getProgress();
-      } catch (err) {
-        console.warn('Using demo progress stats');
-      }
-    };
-    loadProgress();
-  }, []);
 
   const todayWorkout = plan?.workoutPlan?.[0] || {
     day: 'Day 1: Upper Body Focus',
@@ -56,29 +43,14 @@ export const DashboardPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-            Good morning, {user?.name || 'Vendhan'} 👋
+            Your Fitness Dashboard
           </h1>
           <p className="text-slate-500 text-sm mt-0.5">
             Ready to make progress today? Here is your Fitness Command Center.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 shadow-xs relative transition-colors">
-            <Bell className="w-5 h-5" />
-            <span className="w-2 h-2 rounded-full bg-emerald-500 absolute top-2 right-2 ring-2 ring-white" />
-          </button>
-
-          <div 
-            onClick={() => setActiveTab('profile')}
-            className="flex items-center gap-2.5 p-1.5 pr-3 rounded-full bg-white border border-slate-200 shadow-xs cursor-pointer hover:border-blue-400 transition-all"
-          >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-emerald-500 text-white font-bold text-xs flex items-center justify-center">
-              {user?.name?.[0]?.toUpperCase() || 'V'}
-            </div>
-            <span className="text-xs font-bold text-slate-800">{user?.name || 'Vendhan'}</span>
-          </div>
-        </div>
+        <button onClick={() => setActiveTab('profile')} className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold">Fitness Profile</button>
       </div>
 
       {/* DASHBOARD HERO CARD */}

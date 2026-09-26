@@ -1,32 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose');
-const auth = require('../middleware/auth');
-const FitnessProfile = require('../models/FitnessProfile');
-const memoryDb = require('../config/memoryStore');
 const { chatWithAI } = require('../services/geminiService');
 
-const isDbConnected = () => mongoose.connection.readyState === 1;
-
 // POST /api/ai/chat
-router.post('/chat', auth, async (req, res) => {
+router.post('/chat', async (req, res) => {
   try {
-    const userId = req.user.id;
-    const { message, history } = req.body;
+    const { message, history, profile } = req.body;
 
     if (!message || typeof message !== 'string') {
       return res.status(400).json({ message: 'Please enter a valid question or message' });
     }
 
-    let userProfile = null;
-    if (isDbConnected()) {
-      userProfile = await FitnessProfile.findOne({ userId });
-    } else {
-      userProfile = memoryDb.profiles.find(p => p.userId.toString() === userId.toString());
-    }
-
-    console.log(`[AI Assistant API] User ${userId} asked: "${message}"`);
-    const reply = await chatWithAI(message, history || [], userProfile);
+    console.log(`[AI Assistant API] Received question: "${message}"`);
+    const reply = await chatWithAI(message, history || [], profile || null);
 
     return res.json({
       reply,

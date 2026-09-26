@@ -7,23 +7,25 @@ import {
   Minus, 
   Apple
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useApp } from '../context/AppContext';
+import { storage } from '../utils/storage';
 
 export const NutritionPage: React.FC = () => {
-  const { plan } = useAuth();
+  const { plan, setPlan } = useApp();
   
-  const [waterLiters, setWaterLiters] = useState<number>(3.5);
+  const [waterLiters, setWaterLiters] = useState<number>(() => storage.getPreferences({ waterLiters: 0 }).waterLiters);
   const targetWater = 4.0;
 
-  const [completedMeals, setCompletedMeals] = useState<{ [key: string]: boolean }>({
-    breakfast: true,
-    lunch: true,
-    dinner: false,
-    snack: false,
-  });
+  const completedMeals = plan?.nutritionPlan?.completedMeals || [];
 
   const toggleMeal = (mealKey: string) => {
-    setCompletedMeals(prev => ({ ...prev, [mealKey]: !prev[mealKey] }));
+    const updatedMeals = completedMeals.includes(mealKey)
+      ? completedMeals.filter((meal) => meal !== mealKey)
+      : [...completedMeals, mealKey];
+    setPlan((current) => current ? {
+      ...current,
+      nutritionPlan: { ...current.nutritionPlan, completedMeals: updatedMeals },
+    } : current);
   };
 
   const meals = [
@@ -74,7 +76,9 @@ export const NutritionPage: React.FC = () => {
   ];
 
   const handleWaterChange = (delta: number) => {
-    setWaterLiters(prev => Math.max(0, parseFloat((prev + delta).toFixed(1))));
+    const nextWaterLiters = Math.max(0, parseFloat((waterLiters + delta).toFixed(1)));
+    setWaterLiters(nextWaterLiters);
+    storage.setPreferences({ waterLiters: nextWaterLiters });
   };
 
   const waterPercentage = Math.min(100, Math.round((waterLiters / targetWater) * 100));
@@ -163,7 +167,8 @@ export const NutritionPage: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {meals.map((meal) => {
-            const isDone = !!completedMeals[meal.key];
+            const mealKey = meal.key === 'snack' ? 'snacks' : meal.key;
+            const isDone = completedMeals.includes(mealKey);
 
             return (
               <div 
@@ -187,7 +192,7 @@ export const NutritionPage: React.FC = () => {
                   </div>
 
                   <button
-                    onClick={() => toggleMeal(meal.key)}
+                    onClick={() => toggleMeal(mealKey)}
                     className={`p-2 rounded-xl border transition-all ${
                       isDone
                         ? 'bg-emerald-600 border-emerald-600 text-white'

@@ -1,9 +1,9 @@
 import React from 'react';
 import { Activity, Sparkles, Heart, ShieldAlert } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useApp } from '../context/AppContext';
 
 export const Footer: React.FC = () => {
-  const { setActiveTab } = useAuth();
+  const { setActiveTab } = useApp();
 
   return (
     <footer className="bg-slate-900 border-t border-slate-800 text-slate-400 text-xs py-10 px-4 sm:px-6 lg:px-8 mt-auto">

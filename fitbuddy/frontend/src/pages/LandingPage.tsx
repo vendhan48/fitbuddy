@@ -15,11 +15,11 @@ import {
   ShieldCheck, 
   ChevronRight
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useApp } from '../context/AppContext';
 import AIPulse from '../components/AIPulse';
 
 export const LandingPage: React.FC = () => {
-  const { setActiveTab } = useAuth();
+  const { setActiveTab } = useApp();
 
   const features = [
     {
@@ -98,7 +98,7 @@ export const LandingPage: React.FC = () => {
                 onClick={() => setActiveTab('profile')}
                 className="px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-600 to-emerald-500 text-white font-bold text-base shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/35 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 group"
               >
-                <span>Generate My Plan</span>
+                <span>Create My Fitness Plan</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
 
